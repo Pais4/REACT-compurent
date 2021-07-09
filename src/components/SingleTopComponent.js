@@ -20,6 +20,7 @@ const Container = styled.div`
     padding: 10px;
     border-radius: 20px;
     box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 
     &:hover {
         background-color: lightgray;
