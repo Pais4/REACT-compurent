@@ -13,6 +13,7 @@ const RegisterFormComponent = () => {
     const history = useHistory();
     const [userData, setUserData] = useState({})
     const [invalidFields, setInvalidFields] = useState(false)
+    const [invalidEmail, setInvalidEmail] = useState(false)
 
     const [registerValues, handleRegisterInputChange] = useForm({
         idNumber: '',
@@ -43,7 +44,7 @@ const RegisterFormComponent = () => {
         } else if (idNumber.length > 15 || password.length > 20 || email.length > 50 || fullName.length > 50 || address.length > 300 || city.length > 20 || phone.length > 20) {
             console.log('Caracteres largos');
         } else if (!validateEmail(email)) {
-            console.log('Invalid email');
+            setInvalidEmail(true)
         } else if (password !== repeatPassword) {
             console.log('Las contraseñas deben coincidir');
         } else {
@@ -137,6 +138,9 @@ const RegisterFormComponent = () => {
             </FormContainer>
             {
                 (invalidFields) && <InputErrorComponent text='Todos los campos son obligatorios (*)'/>
+            }
+            {
+                (invalidEmail) && <InputErrorComponent text='Correo ingresado invalido.'/>
             }
             <RegisterText>Already have an account? <Link to="/login"><span>Login</span></Link></RegisterText>
         </Container>

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios'
 
 import SingleTopComponent from './SingleTopComponent';
+import ContentLoader from 'react-content-loader';
 
 const TopMusicComponent = () => {
 
@@ -35,7 +36,7 @@ const TopMusicComponent = () => {
             <TopContainer>
                 {
                     (musicData.length < 1) 
-                        ? <h1>Cargando...</h1>
+                        ? <ContentLoader />
                         : (
                             musicData.map(data => (
                             <SingleTopComponent 
