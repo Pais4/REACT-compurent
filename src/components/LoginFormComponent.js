@@ -1,21 +1,17 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { Link, useHistory  } from "react-router-dom"
-import axios from "axios";
+import { Link  } from "react-router-dom"
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
 
 import { useForm } from '../hooks/useForm'
 import { validateEmail } from '../helpers/validateEmail'
-import InputErrorComponent from './InputErrorComponent'
+import { startLogin } from '../actions/auth';
 import LogoComponent from './LogoComponent';
 
 const LoginFormComponent = () => {
 
-    const history = useHistory()
-    const [userData, setUserData] = useState({})
-    const [invalidEmail, setInvalidEmail] = useState(false)
-    const [invalidFields, setInvalidFields] = useState(false)
-    const [invalidLength, setInvalidLength] = useState(false)
-    const [invalidUser, setInvalidUser] = useState(false)
+    const dispatch = useDispatch()
     const [loginValues, handleLoginInputChange] = useForm({
         email: '',
         password: ''
@@ -26,34 +22,13 @@ const LoginFormComponent = () => {
     const submitLogin = e => {
         e.preventDefault();
         if (email === '' || password === '') {
-            setInvalidFields(true)
+            Swal.fire('Error', 'Todos los campos son obligatorios.', 'error')
         } else if(!validateEmail(email)) {
-            setInvalidFields(false)
-            setInvalidEmail(true)
+            Swal.fire('Error', 'El email ingresado es inválido.', 'error')
         } else if(email.length > 50 || password.length > 20) {
-            setInvalidEmail(false)
-            setInvalidLength(true)
+            Swal.fire('Error', 'Campos ingresados demasiado largos.', 'error')
         } else {
-            const fetchLogin = async() => {
-                try {
-                    const url = 'https://node-auth-mascotas.herokuapp.com/api/auth'
-                    await axios.post(url, {email, password})
-                        .then(res => {
-                            setUserData(res.data)
-                            if (res.data.code !== 200) setInvalidUser(true)
-                            else localStorage.setItem('token',res.data.token)
-                        })
-                        .then(() => {
-                            return localStorage.getItem('token')
-                        })
-                        .then((token) => {
-                            (token) && history.push('/')
-                        })
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-            fetchLogin()
+            dispatch(startLogin(email, password))
         }
     }
 
@@ -80,18 +55,6 @@ const LoginFormComponent = () => {
                 >
                     Log In
                 </LoginBtn>
-                {
-                    (invalidFields) && <InputErrorComponent text='Todos los campos son obligatorios'/>
-                }
-                {
-                    (invalidEmail) && <InputErrorComponent text='El correo es inválido.'/>
-                }
-                {
-                    (invalidLength) && <InputErrorComponent text='Campos ingresados muy largos'/>
-                }
-                {
-                    (invalidUser) && <InputErrorComponent text={userData.msg}/>
-                }
             </FormContainer>
             <RegisterText>Don't have an account? <Link to="/register"><span>Register</span></Link></RegisterText>
         </Container>

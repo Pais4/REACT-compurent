@@ -1,19 +1,17 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { Link, useHistory } from "react-router-dom"
-import axios from "axios";
+import { Link } from "react-router-dom"
+import { useDispatch } from 'react-redux'
+import Swal from 'sweetalert2'
 
 import { useForm } from '../hooks/useForm'
-import InputErrorComponent from './InputErrorComponent'
 import { validateEmail } from '../helpers/validateEmail'
 import LogoComponent from './LogoComponent';
+import { startRegister } from '../actions/auth'
 
 const RegisterFormComponent = () => {
 
-    const history = useHistory();
-    const [userData, setUserData] = useState({})
-    const [invalidFields, setInvalidFields] = useState(false)
-    const [invalidEmail, setInvalidEmail] = useState(false)
+    const dispatch = useDispatch()
 
     const [registerValues, handleRegisterInputChange] = useForm({
         idNumber: '',
@@ -26,44 +24,20 @@ const RegisterFormComponent = () => {
         repeatPassword: ''
     })
 
-    const getToken = async() => {
-        const token = await localStorage.getItem('token')
-        if (token) {
-            history.push('/')
-        } else {
-            return
-        }
-    }
-
     const { idNumber, email, fullName, address, city, phone, password, repeatPassword } = registerValues
 
     const submitRegister = e => {
         e.preventDefault()
         if (idNumber === '' || password === '' || fullName === '' || email === '' || address === '') {
-            setInvalidFields(true)
+            Swal.fire('Error', 'Todos los campos son obligatorios.', 'error')
         } else if (idNumber.length > 15 || password.length > 20 || email.length > 50 || fullName.length > 50 || address.length > 300 || city.length > 20 || phone.length > 20) {
-            console.log('Caracteres largos');
+            Swal.fire('Error', 'Campos ingresados demasiado largos.', 'error')
         } else if (!validateEmail(email)) {
-            setInvalidEmail(true)
+            Swal.fire('Error', 'El email ingresado no es valido.', 'error')
         } else if (password !== repeatPassword) {
-            console.log('Las contraseñas deben coincidir');
+            Swal.fire('Error', 'Las contraseñas deben coincidir', 'error')
         } else {
-            const fetchRegister = async() => {
-                try {
-                    const url = 'https://node-auth-mascotas.herokuapp.com/api/auth/register'
-                    await axios.post(url, {idNumber, email, fullName, address, city, phone, password})
-                        .then(res => {
-                            if (res.data.code === 201) {
-                                setUserData(res.data)
-                                localStorage.setItem('token',res.data.token)
-                            }
-                        })
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-            fetchRegister()
-            getToken()
+            dispatch(startRegister(idNumber, email, fullName, address, city, phone, password))
         }
     }
 
@@ -136,12 +110,6 @@ const RegisterFormComponent = () => {
                     Register
                 </RegisterBtn>
             </FormContainer>
-            {
-                (invalidFields) && <InputErrorComponent text='Todos los campos son obligatorios (*)'/>
-            }
-            {
-                (invalidEmail) && <InputErrorComponent text='Correo ingresado invalido.'/>
-            }
             <RegisterText>Already have an account? <Link to="/login"><span>Login</span></Link></RegisterText>
         </Container>
     )
