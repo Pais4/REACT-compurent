@@ -2,13 +2,12 @@ import React from 'react'
 import styled from 'styled-components';
 
 const SingleTopComponent = ({data}) => {
-    console.log(data);
     return (
         <Container>
             <ImageContainer src={data.strTrackThumb}/>
             <InfoContainer>
                 <Title>{data.strArtist}</Title>
-                <SubTitle>{data.strCountry}</SubTitle>
+                <SubTitle>{data.strTrack}</SubTitle>
             </InfoContainer>
         </Container>
     )

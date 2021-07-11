@@ -1,53 +1,54 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
-// import axios from 'axios'
+import axios from 'axios'
 
-import { dummyData } from '../helpers/dummy';
 import SingleTopComponent from './SingleTopComponent';
 
 const TopMusicComponent = () => {
 
-    const [musicData, setMusicData] = useState({})
+    const [musicData, setMusicData] = useState([])
 
     useEffect(() => {
-        // const getMusicData = async() => {
-        //     const endpointUrl  = 'https://theaudiodb.p.rapidapi.com/trending.php'
+        const getMusicData = async() => {
+            const endpointUrl  = 'https://theaudiodb.p.rapidapi.com/mostloved.php'
         
-        //     try {
-        //         await axios.get(endpointUrl, {
-        //             headers: {
-        //                 'x-rapidapi-key': 'ddd2f93abamsh992b58f86e248b7p17eab4jsn9affbb7f4612',
-        //                 'x-rapidapi-host': 'theaudiodb.p.rapidapi.com'
-        //             },
-        //             params: {
-        //                 country: 'us', 
-        //                 type: 'itunes', 
-        //                 format: 'singles'
-        //             }
-        //         })
-        //             .then(res => setMusicData(res.data))
-        //     } catch (err) {
-        //         console.log(err);
-        //     }
-        // }
+            try {
+                await axios.get(endpointUrl, {
+                    headers: {
+                        'x-rapidapi-key': 'ddd2f93abamsh992b58f86e248b7p17eab4jsn9affbb7f4612',
+                        'x-rapidapi-host': 'theaudiodb.p.rapidapi.com'
+                    },
+                    params: {format: 'track'}
+                })
+                    .then(res => setMusicData(res.data.loved))
+            } catch (err) {
+                console.log(err);
+            }
+        }
 
-        // getMusicData()
+        getMusicData()
     }, [])
-
-    console.log(musicData);
 
     return (
         <Container>
-            <Title>Top Music</Title>
+            <Title>Most Loved</Title>
             <TopContainer>
                 {
-                    dummyData.map(data => (
-                        <SingleTopComponent data={data} key={data.id}/>
+                    (musicData.length < 1) 
+                        ? <h1>Cargando...</h1>
+                        : (
+                            musicData.map(data => (
+                            <SingleTopComponent 
+                                data={data} 
+                                key={`${data.idAlbum}-${data.idLyric}`}
+                            />
+                        )
                     ))
                 }
             </TopContainer>
         </Container>
     )
+    
 }
 
 const Container = styled.div`

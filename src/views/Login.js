@@ -25,7 +25,9 @@ const Container = styled.div`
 `
 
 const TopContainer = styled.div`
-
+    @media (max-width: 1024px) {
+        display: none;
+    }
 `
 
 const LoginContainer = styled.div`

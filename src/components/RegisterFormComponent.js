@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Link } from "react-router-dom"
+import { Link, useHistory } from "react-router-dom"
+import axios from "axios";
 
 import { useForm } from '../hooks/useForm'
 import InputErrorComponent from './InputErrorComponent'
+import { validateEmail } from '../helpers/validateEmail'
+import LogoComponent from './LogoComponent';
 
 const RegisterFormComponent = () => {
 
+    const history = useHistory();
+    const [userData, setUserData] = useState({})
     const [invalidFields, setInvalidFields] = useState(false)
 
     const [registerValues, handleRegisterInputChange] = useForm({
@@ -20,18 +25,50 @@ const RegisterFormComponent = () => {
         repeatPassword: ''
     })
 
+    const getToken = async() => {
+        const token = await localStorage.getItem('token')
+        if (token) {
+            history.push('/')
+        } else {
+            return
+        }
+    }
+
     const { idNumber, email, fullName, address, city, phone, password, repeatPassword } = registerValues
 
     const submitRegister = e => {
         e.preventDefault()
         if (idNumber === '' || password === '' || fullName === '' || email === '' || address === '') {
             setInvalidFields(true)
+        } else if (idNumber.length > 15 || password.length > 20 || email.length > 50 || fullName.length > 50 || address.length > 300 || city.length > 20 || phone.length > 20) {
+            console.log('Caracteres largos');
+        } else if (!validateEmail(email)) {
+            console.log('Invalid email');
+        } else if (password !== repeatPassword) {
+            console.log('Las contraseñas deben coincidir');
+        } else {
+            const fetchRegister = async() => {
+                try {
+                    const url = 'https://node-auth-mascotas.herokuapp.com/api/auth/register'
+                    await axios.post(url, {idNumber, email, fullName, address, city, phone, password})
+                        .then(res => {
+                            if (res.data.code === 201) {
+                                setUserData(res.data)
+                                localStorage.setItem('token',res.data.token)
+                            }
+                        })
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+            fetchRegister()
+            getToken()
         }
     }
 
     return (
         <Container>
-            <Logo src='https://i.scdn.co/image/ab6761610000e5ebe604d6f3978533dc6b98ca4a' alt='Logo'/>
+            <LogoComponent />
             <Title>Register</Title>
             <FormContainer onSubmit={submitRegister}>
                 <InputContainer>
@@ -82,12 +119,14 @@ const RegisterFormComponent = () => {
                         name='password'
                         value={password}
                         onChange={handleRegisterInputChange}
+                        type='password'
                     />
                     <FormInput 
                         placeholder='Repetir Contraseña *'
                         name='repeatPassword'
                         value={repeatPassword}
                         onChange={handleRegisterInputChange}
+                        type='password'
                     />
                 </InputContainer>
                 <RegisterBtn
@@ -105,7 +144,7 @@ const RegisterFormComponent = () => {
 }
 
 const Container = styled.div`
-    height: 60vh;
+    height: 70vh;
     width: 40vw;
     background-color: #FFFFFF;
     border-radius: 20px;
@@ -114,11 +153,11 @@ const Container = styled.div`
     justify-content: center;
     align-items: center;
     box-shadow: 1px 1px 8px 0px rgba(0, 0, 0, 0.2);
-`
 
-const Logo = styled.img`
-    height: 100px;
-    margin-bottom: 10px;
+    @media (max-width: 1550px) {
+        height: 80vh;
+        width: 80vw;
+    }
 `
 
 const Title = styled.h2`
@@ -130,10 +169,17 @@ const FormContainer = styled.form`
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
 `
 
 const InputContainer = styled.div`
     display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 820px) {
+        flex-direction: column;
+    }
 `
 
 const FormInput = styled.input`

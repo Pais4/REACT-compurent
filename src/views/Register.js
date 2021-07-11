@@ -30,6 +30,9 @@ const TopContainer = styled.div`
 
 const LoginContainer = styled.div`
     margin-left: 40px;
+    @media (max-width: 1550px) {
+        display: none;
+    }
 `
 
 export default Register
